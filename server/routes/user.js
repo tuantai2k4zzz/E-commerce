@@ -5,6 +5,10 @@ const { verifyAccessToken } = require('../middlewares/verifyToken')
 router.post('/register', ctrl.register)
 router.post('/login', ctrl.login )
 router.get('/current', verifyAccessToken ,ctrl.getCurrent)
+router.post('/refreshAccessToken', ctrl.refreshAccessToken)
+router.get('/logout', ctrl.logout)
+
+
 
 
 module.exports = router
