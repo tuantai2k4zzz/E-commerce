@@ -4,6 +4,7 @@ const User = require('../models/user')
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken')
 const {sendMail} = require('../ultils/sendmail')
+const crypto = require('crypto')
 
 const register = asyncHandler( async(req, res) => {
     const {email, password, lastname, firstname} = req.body
@@ -107,8 +108,9 @@ const forgotPassword = asyncHandler( async (req, res) => {
     if(!email) throw new Error('Missing email')
     const user = await User.findOne({email})
     if(!user) throw new Error('User not found')
-    const resetToken = user.createPasswordChangeToken()
+    const resetToken = await user.createPasswordChangeToken()
     user.save()
+    console.log(resetToken)
     const html = `
   <p>Xin vui lòng click vào link dưới đây để thay đổi mật khẩu của bạn.</p>
   <b>Link này sẽ hết hạn trong 15 phút kể từ bây giờ</b>
@@ -123,12 +125,30 @@ const forgotPassword = asyncHandler( async (req, res) => {
         email,
         html
     }
-    console.log(data)
     const rs = await sendMail(data)
     return res.json({
         success: true,
         rs
     })
+})
+
+const resetPassword = asyncHandler( async (req, res) => {
+    const {password, token} = req.body
+    if(!password || !token) throw new Error("Missing input")
+        const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
+    const users = await user.findOne({passwordResetToken, passwordResetExpires: {$gt: Date.now()}})
+    console.log(users)
+    if(!users) throw new Error('Invalid reset token')
+    users.password = password
+    users.PasswordChangeToken = undefined
+    users.passwordChangeAt = Date.now()
+    users.passwordResetExpires = undefined
+    await users.save()
+    return res.json({
+        success: users ? true : false,
+        mes: users ? "Update password" : " Something went wrong" 
+    })
+
 })
 
 
@@ -139,5 +159,6 @@ module.exports = {
     getCurrent,
     refreshAccessToken,
     logout,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 }

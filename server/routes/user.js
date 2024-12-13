@@ -8,6 +8,7 @@ router.get('/current', verifyAccessToken ,ctrl.getCurrent)
 router.post('/refreshAccessToken', ctrl.refreshAccessToken)
 router.get('/logout', ctrl.logout)
 router.get('/forgotPassword', ctrl.forgotPassword)
+router.put('/resetpassword', ctrl.resetPassword)
 
 
 

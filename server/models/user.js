@@ -70,7 +70,7 @@ userSchema.methods =  {
     },
     createPasswordChangeToken: async function() {
         const resetToken = await crypto.randomBytes(32).toString('hex')
-        this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+        this.passwordResetToken = await crypto.createHash('sha256').update(resetToken).digest('hex')
         this.passwordResetExpires = Date.now() + 15 * 60 * 1000
         return resetToken 
     }
